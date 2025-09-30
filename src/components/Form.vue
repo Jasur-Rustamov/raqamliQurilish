@@ -1,0 +1,144 @@
+<template>
+    <div id="form"
+        class="min-h-screen flex items-center justify-center bg-white border-t border-t-gray-300 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-2 gap-10">
+            <!-- Chap blok -->
+            <div class="flex flex-col justify-center items-center text-center">
+                <a :href="`tel:${phone}`" class="inline-flex items-center gap-2 text-black hover:text-gray-700">
+                    <div class="flex flex-col items-center">
+                        <i class="fa-solid fa-square-phone text-[80px] sm:text-[100px] lg:text-[110px]"></i>
+                        <span class="text-base sm:text-lg font-medium underline">
+                            {{ formattedPhone }}
+                        </span>
+                    </div>
+                </a>
+                <p class="mt-4 text-gray-600 text-sm sm:text-base text-center max-w-xs sm:max-w-sm">
+                    Biz bilan to‘g‘ridan-to‘g‘ri bog‘lanish uchun ushbu raqamga qo‘ng‘iroq
+                    qiling.
+                </p>
+            </div>
+
+            <!-- O‘ng blok -->
+            <form @submit.prevent="onSubmit" class="bg-white rounded-xl shadow-md p-6 sm:p-8 border border-gray-200">
+                <h2 class="text-xl sm:text-2xl font-bold text-black mb-6 sm:mb-8">
+                    Aloqa uchun
+                </h2>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ism</label>
+                        <input v-model="form.name" type="text" required placeholder="Ismingizni kiriting"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Viloyat</label>
+                        <select v-model="form.region" required
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base">
+                            <option value="Andijon">Andijon</option>
+                            <option value="Buxoro">Buxoro</option>
+                            <option value="Jizzax">Jizzax</option>
+                            <option value="Qashqadaryo">Qashqadaryo</option>
+                            <option value="Navoiy">Navoiy</option>
+                            <option value="Namangan">Namangan</option>
+                            <option value="Samarqand">Samarqand</option>
+                            <option value="Surxondaryo">Surxondaryo</option>
+                            <option value="Sirdaryo">Sirdaryo</option>
+                            <option value="Fargona">Farg‘ona</option>
+                            <option value="Xorazm">Xorazm</option>
+                            <option value="Toshkent">Toshkent</option>
+                            <option value="Qoraqalpogiston">
+                                Qoraqalpog‘iston Respublikasi
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Aloqa uchun qulay vaqt</label>
+                        <select v-model="form.time" required
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base">
+                            <option value="9-12">9:00 dan 12:00 gacha</option>
+                            <option value="12-15">13:00 dan 17:00 gacha</option>
+                            <option value="15-18">17:00 dan 20:00 gacha</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Telefon raqam</label>
+                        <input v-model="form.phone" type="tel" required placeholder="93 222 10 09"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" />
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="mt-6 w-full py-3 bg-black hover:bg-gray-800 text-white font-medium rounded-lg transition-colors text-sm sm:text-base g-recaptcha"
+                    :data-sitekey="siteKey" data-callback="onVerify" data-size="invisible">
+                    Tasdiqlash
+                </button>
+            </form>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { reactive, computed } from 'vue'
+import axios from 'axios'
+import Swal from 'sweetalert2'
+
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITEKEY
+
+// Google global callback funksiya talab qiladi
+window.onVerify = (token) => {
+    console.log("Captcha token:", token)
+    // tokenni backendga yuborasiz
+}
+// telefon link uchun
+const phone = '+998932221009'
+const formattedPhone = computed(() =>
+    phone.replace(/(\+998)(\d{2})(\d{3})(\d{2})(\d{2})/, "$1 $2 $3 $4 $5")
+)
+
+// forma ma'lumotlari
+const form = reactive({
+    name: '',
+    region: 'Toshkent',
+    time: '9-12',
+    phone: ''
+})
+
+// Telegram sozlamalari
+const token = "7772654953:AAHyRU3YazdhMMgPHzq0nXfZZYRAPMjyVvc"
+const chat_id = "-1003066421710"
+
+function onSubmit() {
+    const text = `
+Ism: ${form.name}
+Tel: +998${form.phone}
+Hudud: ${form.region}
+Vaqt: ${form.time}
+    `
+
+    const link = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chat_id}&text=${encodeURIComponent(text)}`
+
+    axios.get(link).then(() => {
+        Swal.fire({
+            icon: "success",
+            title: "Ma'lumotlar yuborildi !",
+            showConfirmButton: false,
+            timer: 1500,
+        }).then(() => {
+            sessionStorage.setItem("registered", true)
+            location.reload()
+        })
+    }).catch(err => {
+        console.error("Telegram API error:", err.response?.data || err.message)
+        Swal.fire({
+            icon: "error",
+            title: "Xatolik",
+            text: "Telegram API xabarni qabul qilmadi."
+        })
+    })
+}
+
+
+</script>
