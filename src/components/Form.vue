@@ -2,7 +2,7 @@
     <div id="form"
         class="min-h-screen flex items-center justify-center bg-white border-t border-t-gray-300 px-4 sm:px-6 lg:px-8">
         <div class="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-2 gap-10">
-            <!-- Chap blok -->
+            <!-- Left -->
             <div class="flex flex-col justify-center items-center text-center">
                 <a :href="`tel:${phone}`" class="inline-flex items-center gap-2 text-black hover:text-gray-700">
                     <div class="flex flex-col items-center">
@@ -13,12 +13,11 @@
                     </div>
                 </a>
                 <p class="mt-4 text-gray-600 text-sm sm:text-base text-center max-w-xs sm:max-w-sm">
-                    Biz bilan to‘g‘ridan-to‘g‘ri bog‘lanish uchun ushbu raqamga qo‘ng‘iroq
-                    qiling.
+                    Biz bilan to‘g‘ridan-to‘g‘ri bog‘lanish uchun ushbu raqamga qo‘ng‘iroq qiling.
                 </p>
             </div>
 
-            <!-- O‘ng blok -->
+            <!-- Right: form -->
             <form @submit.prevent="onSubmit" class="bg-white rounded-xl shadow-md p-6 sm:p-8 border border-gray-200">
                 <h2 class="text-xl sm:text-2xl font-bold text-black mb-6 sm:mb-8">
                     Aloqa uchun
@@ -44,12 +43,10 @@
                             <option value="Samarqand">Samarqand</option>
                             <option value="Surxondaryo">Surxondaryo</option>
                             <option value="Sirdaryo">Sirdaryo</option>
-                            <option value="Fargona">Farg‘ona</option>
+                            <option value="Farg‘ona">Farg‘ona</option>
                             <option value="Xorazm">Xorazm</option>
                             <option value="Toshkent">Toshkent</option>
-                            <option value="Qoraqalpogiston">
-                                Qoraqalpog‘iston Respublikasi
-                            </option>
+                            <option value="Qoraqalpog‘iston">Qoraqalpog‘iston Respublikasi</option>
                         </select>
                     </div>
 
@@ -70,10 +67,16 @@
                     </div>
                 </div>
 
-                <button type="submit"
-                    class="mt-6 w-full py-3 bg-black hover:bg-gray-800 text-white font-medium rounded-lg transition-colors text-sm sm:text-base g-recaptcha"
-                    :data-sitekey="siteKey" data-callback="onVerify" data-size="invisible">
-                    Tasdiqlash
+                <button type="submit" :disabled="sending"
+                    class="mt-6 w-full py-3 bg-black hover:bg-gray-800 text-white font-medium rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center gap-2">
+                    <svg v-if="sending" class="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <span v-if="!sending">Tasdiqlash</span>
+                    <span v-else>Yuborilmoqda...</span>
                 </button>
             </form>
         </div>
@@ -81,24 +84,17 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
-const siteKey = import.meta.env.VITE_RECAPTCHA_SITEKEY
-
-// Google global callback funksiya talab qiladi
-window.onVerify = (token) => {
-    console.log("Captcha token:", token)
-    // tokenni backendga yuborasiz
-}
-// telefon link uchun
+// Telefon link uchun
 const phone = '+998932221009'
 const formattedPhone = computed(() =>
     phone.replace(/(\+998)(\d{2})(\d{3})(\d{2})(\d{2})/, "$1 $2 $3 $4 $5")
 )
 
-// forma ma'lumotlari
+// Forma ma'lumotlari
 const form = reactive({
     name: '',
     region: 'Toshkent',
@@ -106,39 +102,96 @@ const form = reactive({
     phone: ''
 })
 
-// Telegram sozlamalari
+const sending = ref(false)
+
+// --- O'zgartiring: o'zingizga mos Google Apps Script URL (exec) ---
+const googleLink = "https://script.google.com/macros/s/AKfycbzwiN6IVp304wYFQATB4zZJ88_xPZ8ZK760PHzIJAYWzExKyKG9NH6l8PP8clbigrtrhg/exec" // yoki /exec
+
+// --- O'zgartiring: Telegram bot token va chat id ---
 const token = "7772654953:AAHyRU3YazdhMMgPHzq0nXfZZYRAPMjyVvc"
 const chat_id = "-1003066421710"
 
-function onSubmit() {
-    const text = `
-Ism: ${form.name}
-Tel: +998${form.phone}
-Hudud: ${form.region}
-Vaqt: ${form.time}
-    `
+// Asosiy submit
+async function onSubmit() {
+    if (sending.value) return
+    sending.value = true
 
-    const link = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chat_id}&text=${encodeURIComponent(text)}`
+    // oddiy sanitizatsiya
+    const cleanPhone = form.phone.replace(/\D/g, "")
+    const phoneWithCode = `+998${cleanPhone}`
 
-    axios.get(link).then(() => {
-        Swal.fire({
+    // Google uchun params
+    const params = {
+        mijoz: form.name || "—",
+        telefon: phoneWithCode,
+        aloqa_vaqti: form.time,
+        region: form.region
+    }
+
+    // Telegram matni
+    const text = `📩 Yangi ariza:
+👤 Ism: ${form.name || "—"}
+📞 Telefon: ${phoneWithCode}
+📍 Viloyat: ${form.region}
+⏰ Aloqa vaqti: ${form.time}`
+
+    try {
+        // 1) Google Apps Script ga yuborish (GET bilan params)
+        // NOTE: agar GAS doGet/doPost sozlamalari to'g'ri bo'lsa, bu ishlaydi.
+        await axios.get(googleLink, { params, timeout: 12000 })
+
+        // 2) Telegram ga yuborish
+        // (Agar siz xavfsizlik sababli tokenni serverga ko'chirsangiz, bu chaqiriq server orqali bo'lishi kerak)
+        await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+            chat_id,
+            text
+        })
+
+        // 3) Modalka: qo'ng'iroq qilishni taklif etish
+        const res = await Swal.fire({
+            title: "Ma'lumot yuborildi!",
+            text: "Hozir qo‘ng‘iroq qilmoqchimisiz?",
             icon: "success",
-            title: "Ma'lumotlar yuborildi !",
-            showConfirmButton: false,
-            timer: 1500,
-        }).then(() => {
-            sessionStorage.setItem("registered", true)
-            location.reload()
+            showCancelButton: true,
+            confirmButtonText: "📞 Qo‘ng‘iroq qilish",
+            cancelButtonText: "❌ Bekor qilish",
+            confirmButtonColor: "#000000",
+            cancelButtonColor: "#d33"
         })
-    }).catch(err => {
-        console.error("Telegram API error:", err.response?.data || err.message)
-        Swal.fire({
-            icon: "error",
-            title: "Xatolik",
-            text: "Telegram API xabarni qabul qilmadi."
-        })
-    })
+
+        if (res.isConfirmed) {
+            // telefon raqamga o'tish
+            window.location.href = `tel:${phone}`
+        }
+
+        // forma tozalash
+        form.name = ""
+        form.region = "Toshkent"
+        form.time = "9-12"
+        form.phone = ""
+
+    } catch (err) {
+        console.error("API error:", err?.response?.data || err?.message || err)
+        // Agar CORS yoki Network error bo'lsa, foydalanuvchiga aniqcha habar berish
+        if (!err?.response) {
+            Swal.fire({
+                icon: "error",
+                title: "Tarmoq xatosi yoki CORS",
+                text: "Brauzer'dan Google Apps Script-ga bevosita bog'lanishda muammo yuz berdi. Iltimos, GAS ni `Deploy -> Web app` orqali `Anyone, even anonymous` qilib deploy qiling va /exec URL dan foydalaning."
+            })
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Xatolik",
+                text: "Xabar yuborilmadi."
+            })
+        }
+    } finally {
+        sending.value = false
+    }
 }
-
-
 </script>
+
+<style scoped>
+/* qo'shimcha kichik uslublar, agar kerak bo'lsa */
+</style>
