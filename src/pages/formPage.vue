@@ -63,7 +63,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Telefon raqam</label>
                         <input v-model="form.phone" type="tel" required placeholder="93 222 10 09"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" />
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" max="9" />
                     </div>
                 </div>
 
@@ -105,7 +105,7 @@ const form = reactive({
 const sending = ref(false)
 
 // --- O'zgartiring: o'zingizga mos Google Apps Script URL (exec) ---
-const googleLink = "https://script.google.com/macros/s/AKfycbzwiN6IVp304wYFQATB4zZJ88_xPZ8ZK760PHzIJAYWzExKyKG9NH6l8PP8clbigrtrhg/exec" // yoki /exec
+const googleLink = "https://script.google.com/macros/s/AKfycbxUC2eNh2v_ccAhCoAfqaqjj8dOW5mc7vKiOEBiwwwHau8HwTh0RHocXh0LPxQH3k2Img/exec" // yoki /exec
 
 // --- O'zgartiring: Telegram bot token va chat id ---
 const token = "7772654953:AAHyRU3YazdhMMgPHzq0nXfZZYRAPMjyVvc"

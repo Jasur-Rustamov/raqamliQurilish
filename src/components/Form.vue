@@ -105,7 +105,7 @@ const form = reactive({
 const sending = ref(false)
 
 // --- O'zgartiring: o'zingizga mos Google Apps Script URL (exec) ---
-const googleLink = "https://script.google.com/macros/s/AKfycbzwiN6IVp304wYFQATB4zZJ88_xPZ8ZK760PHzIJAYWzExKyKG9NH6l8PP8clbigrtrhg/exec" // yoki /exec
+const googleLink = "https://script.google.com/macros/s/AKfycbxUC2eNh2v_ccAhCoAfqaqjj8dOW5mc7vKiOEBiwwwHau8HwTh0RHocXh0LPxQH3k2Img/exec" // yoki /exec
 
 // --- O'zgartiring: Telegram bot token va chat id ---
 const token = "7772654953:AAHyRU3YazdhMMgPHzq0nXfZZYRAPMjyVvc"
