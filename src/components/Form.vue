@@ -148,6 +148,11 @@ async function onSubmit() {
         })
 
         // 3) Modalka: qo'ng'iroq qilishni taklif etish
+        // Facebook Pixel event
+        if (window.fbq) {
+            fbq('track', 'Lead')
+        }
+
         const res = await Swal.fire({
             title: "Ma'lumot yuborildi!",
             text: "Hozir qo‘ng‘iroq qilmoqchimisiz?",

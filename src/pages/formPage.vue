@@ -63,7 +63,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Telefon raqam</label>
                         <input v-model="form.phone" type="tel" required placeholder="93 222 10 09"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" max="9" />
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" />
                     </div>
                 </div>
 
@@ -148,6 +148,10 @@ async function onSubmit() {
         })
 
         // 3) Modalka: qo'ng'iroq qilishni taklif etish
+        if (window.fbq) {
+            fbq('track', 'Lead')
+        }
+
         const res = await Swal.fire({
             title: "Ma'lumot yuborildi!",
             text: "Hozir qo‘ng‘iroq qilmoqchimisiz?",
