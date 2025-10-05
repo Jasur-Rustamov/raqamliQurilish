@@ -118,14 +118,15 @@ async function onSubmit() {
 
     // oddiy sanitizatsiya
     const cleanPhone = form.phone.replace(/\D/g, "")
-    const phoneWithCode = `+998${cleanPhone}`
+    const phoneWithCode = `'+998${cleanPhone}`
 
     // Google uchun params
     const params = {
         mijoz: form.name || "—",
         telefon: phoneWithCode,
         aloqa_vaqti: form.time,
-        region: form.region
+        region: form.region,
+        dastur: "Raqamli Qurilish"
     }
 
     // Telegram matni
