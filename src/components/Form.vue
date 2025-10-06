@@ -30,7 +30,7 @@
                             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base" />
                     </div>
 
-                    <div>
+                    <div v-if="false">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Viloyat</label>
                         <select v-model="form.region" required
                             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base">
@@ -50,7 +50,7 @@
                         </select>
                     </div>
 
-                    <div>
+                    <div v-if="false">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Aloqa uchun qulay vaqt</label>
                         <select v-model="form.time" required
                             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-sm sm:text-base">
